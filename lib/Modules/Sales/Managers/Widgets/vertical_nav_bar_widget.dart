@@ -156,7 +156,7 @@ class VerticalNavBarWidget extends StatelessWidget {
               tileTitle: 'Log Out',
               tileIcon: CupertinoIcons.lessthan_square_fill,
               onTap: () {
-                salesProvider.changeViewIndex(7);
+                salesProvider.getClients(context);
               },
             ),
           ],

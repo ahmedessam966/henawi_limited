@@ -39,7 +39,6 @@ class SalesAgentController with ChangeNotifier {
 
   final List _fetchedInvoiceNumbers = [];
   final List _fetchedQuotationNumbers = [];
-  final List _fetchedClients = [];
 
   final TextEditingController _searchController = TextEditingController();
   TextEditingController get searchController => _searchController;

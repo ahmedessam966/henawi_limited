@@ -91,7 +91,9 @@ class ManagerSalesSummaryCard extends StatelessWidget {
                                     children: [
                                       RoundedSummaryBlock(
                                         loader: salesProvider.getTotalGrossPerMonth(context),
-                                        onPressed: () async {},
+                                        onPressed: () async {
+                                          salesProvider.getLastInvoiceNumber(context);
+                                        },
                                         blockTitle: '${salesProvider.totalGrossSales} SR.',
                                         blockColor: const Color(0xaaf1916d),
                                         circleColor: const Color(0xaaae445a),

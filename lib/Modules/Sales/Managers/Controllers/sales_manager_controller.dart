@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_function_literals_in_foreach_calls, use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:henawi_limited/Modules/Sales/Shared/Models/client_model.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -12,6 +13,15 @@ import '../../Shared/Models/revenue_item_model.dart';
 class SalesManagerController with ChangeNotifier {
   int _loadedPage = 1;
 
+  String _lastInvoiceNumber = '';
+  String get lastInvoiceNumber => _lastInvoiceNumber;
+
+  String _lastDraftInvoiceNumber = '';
+  String get lastDraftInvoiceNumber => _lastDraftInvoiceNumber;
+
+  String _lastFetched = '';
+  String get lastFetched => _lastFetched;
+
   int _viewIndex = 0;
   int get viewIndex => _viewIndex;
 
@@ -22,6 +32,10 @@ class SalesManagerController with ChangeNotifier {
   final List _fetchedSerials = [];
   final List _fetchedTopAchievers = [];
   final List _fetchedInvoices = [];
+  final List _fetchedClients = [];
+
+  final List<InvoiceModel> _createdInvoice = [];
+  List<InvoiceModel> get createdInvoice => _createdInvoice;
 
   final Map _demandedList = {};
   Map get demandedList => _demandedList;
@@ -44,6 +58,9 @@ class SalesManagerController with ChangeNotifier {
   final List<OnlineRevenueItemModel> _onlineRevenueList = [];
   List<OnlineRevenueItemModel> get onlineRevenueList => _onlineRevenueList;
 
+  final List<ClientModel> _clientsList = [];
+  List<ClientModel> get clientsModel => _clientsList;
+
   final TextEditingController _searchController = TextEditingController();
   TextEditingController get searchController => _searchController;
 
@@ -65,6 +82,23 @@ class SalesManagerController with ChangeNotifier {
   void fetchMoreInvoices(BuildContext context) {
     _loadedPage++;
     getAllInvoices(context);
+  }
+
+  Future getLastInvoiceNumber(BuildContext context) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    await pb
+        .collection('INVOICES')
+        .getList(fields: 'Invoice_Date, Invoice_Number', sort: '-Invoice_Date')
+        .then((value) {
+      DateFormat dateFormat = DateFormat("dd MMMM yyyy");
+      String formattedDate = dateFormat.format(DateTime.now());
+
+      DateFormat timeFormat = DateFormat("HH:mm");
+      String formattedTime = timeFormat.format(DateTime.now());
+      _lastInvoiceNumber = value.items.first.data['Invoice_Date'];
+      _lastFetched = '$formattedDate - $formattedTime';
+      notifyListeners();
+    });
   }
 
   Future getTotalGrossPerMonth(BuildContext context) async {
@@ -250,5 +284,25 @@ class SalesManagerController with ChangeNotifier {
     } on ClientException catch (e) {
       DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
     }
+  }
+
+  Future getClients(BuildContext context) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    await pb.collection('CLIENTS').getFullList().then((value) {
+      value.forEach((element) {
+        if (_fetchedClients.contains(element.id)) {
+        } else {
+          _fetchedClients.add(element.id);
+          _clientsList.add(ClientModel(
+              clientName: element.data['Client_Name'],
+              amountDue: element.data['Client_Amount_Due'],
+              totalAmount: element.data['Client_Total_Amount'],
+              quotations: element.data['Quotations'],
+              invoices: element.data['Invoices'],
+              clientEmail: element.data['Official_Email']));
+          notifyListeners();
+        }
+      });
+    });
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:henawi_limited/Modules/Sales/Managers/Widgets/invoices_summary_card.dart';
 import 'package:henawi_limited/Modules/Sales/Managers/Widgets/sales_summary_card.dart';
+import 'package:henawi_limited/Modules/Sales/Shared/Widgets/new_invoice_widget.dart';
 import 'package:henawi_limited/providers.dart';
 import 'package:provider/provider.dart';
 
@@ -35,8 +36,14 @@ class SalesManagerScreen extends StatelessWidget {
                           return Container();
                         case 2:
                           return const InvoicesSummaryCard();
+                        case 3:
+                          return Container();
                         case 4:
                           return Container();
+                        case 5:
+                          return Container();
+                        case 10:
+                          return NewInvoiceWidget(salesProvider: salesProvider, authProvider: authProvider);
                         default:
                           return const Text('data');
                       }
