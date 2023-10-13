@@ -42,8 +42,8 @@ class SalesManagerScreen extends StatelessWidget {
                           return Container();
                         case 5:
                           return Container();
-                        case 10:
-                          return NewInvoiceWidget(salesProvider: salesProvider, authProvider: authProvider);
+                        case 9:
+                          return const NewInvoiceWidget();
                         default:
                           return const Text('data');
                       }

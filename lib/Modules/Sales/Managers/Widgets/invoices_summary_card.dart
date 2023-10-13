@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -17,6 +19,7 @@ class InvoicesSummaryCard extends StatelessWidget {
     return Consumer2<SalesManagerController, AuthenticationServices>(
       builder: (context, salesProvider, authProvider, _) {
         salesProvider.getAllInvoices(context);
+
         return Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,42 +84,70 @@ class InvoicesSummaryCard extends StatelessWidget {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(backgroundColor: Colors.transparent),
                               onPressed: () {
-                                // salesProvider.changeViewIndex(10);
-                                // showDialog(
-                                //     context: context,
-                                //     builder: (context) {
-                                //       return BackdropFilter(
-                                //         filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                                //         child: AlertDialog.adaptive(
-                                //           title: Text(
-                                //             'Create new invoice as',
-                                //             style: Theme.of(context).textTheme.titleSmall,
-                                //           ),
-                                //           actions: [
-                                //             ElevatedButton(
-                                //               onPressed: () {},
-                                //               child: Text(
-                                //                 'Record Invoice',
-                                //                 style: GoogleFonts.ubuntu(
-                                //                     fontWeight: FontWeight.w700,
-                                //                     color: Colors.white,
-                                //                     fontSize: context.screenRatio * 8),
-                                //               ),
-                                //             ),
-                                //             ElevatedButton(
-                                //               onPressed: () {},
-                                //               child: Text(
-                                //                 'Draft Invoice',
-                                //                 style: GoogleFonts.ubuntu(
-                                //                     fontWeight: FontWeight.w700,
-                                //                     color: Colors.white,
-                                //                     fontSize: context.screenRatio * 8),
-                                //               ),
-                                //             ),
-                                //           ],
-                                //         ),
-                                //       );
-                                //     });
+                                showAdaptiveDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return BackdropFilter(
+                                        filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                        child: Dialog(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(context.screenRatio * 8),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  CupertinoIcons.exclamationmark_triangle,
+                                                  size: context.screenRatio * 30,
+                                                ),
+                                                SizedBox(
+                                                  width: context.screenWidth * 0.45,
+                                                  child: const Text(
+                                                      'By selecting "Record Invoice", the value of the created invoice will be immediately marked as a required permanent payment from the specified client. Otherwise, the value will be marked as "Pending Approval". You can change the invoice type in the invoice breakdown screen.'),
+                                                ),
+                                                SizedBox(
+                                                  height: context.screenHeight * 0.01,
+                                                ),
+                                                SizedBox(
+                                                  width: context.screenWidth * 0.45,
+                                                  child: Row(
+                                                    mainAxisSize: MainAxisSize.min,
+                                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                    children: [
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                          salesProvider.getLastInvoiceNumber(context);
+                                                          salesProvider.changeViewIndex(9);
+                                                        },
+                                                        child: Text(
+                                                          'Record Invoice',
+                                                          style: GoogleFonts.ubuntu(
+                                                              fontWeight: FontWeight.w700,
+                                                              color: Colors.white,
+                                                              fontSize: context.screenRatio * 8),
+                                                        ),
+                                                      ),
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          Navigator.pop(context);
+                                                        },
+                                                        child: Text(
+                                                          'Draft Invoice',
+                                                          style: GoogleFonts.ubuntu(
+                                                              fontWeight: FontWeight.w700,
+                                                              color: Colors.white,
+                                                              fontSize: context.screenRatio * 8),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    });
                               },
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -168,11 +199,51 @@ class InvoicesSummaryCard extends StatelessWidget {
                                           style: Theme.of(context).textTheme.titleLarge,
                                         ),
                                         const Spacer(),
-                                        ElevatedButton(
-                                          onPressed: () {},
-                                          child: Text(
-                                            'Jump to pending',
-                                            style: Theme.of(context).textTheme.labelMedium,
+                                        Container(
+                                          height: context.screenHeight / 17,
+                                          width: context.screenWidth / 9,
+                                          decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.topLeft,
+                                                end: Alignment.bottomRight,
+                                                colors: [
+                                                  const Color(0xaa9B870D).withOpacity(1),
+                                                  const Color(0xaaEDD622).withOpacity(1)
+                                                ],
+                                              ),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.white.withOpacity(0.3),
+                                                  offset: const Offset(4, 4),
+                                                  blurRadius: 6,
+                                                ),
+                                              ],
+                                              borderRadius: BorderRadius.circular(context.screenRatio * 7)),
+                                          child: ElevatedButton(
+                                            style:
+                                                ElevatedButton.styleFrom(backgroundColor: Colors.transparent),
+                                            onPressed: () {},
+                                            child: FittedBox(
+                                              child: Row(
+                                                children: [
+                                                  Icon(
+                                                    CupertinoIcons.timer_fill,
+                                                    size: context.screenRatio * 30,
+                                                  ),
+                                                  SizedBox(
+                                                    width: context.screenWidth * 0.01,
+                                                  ),
+                                                  Text(
+                                                    'Jump to pending',
+                                                    overflow: TextOverflow.clip,
+                                                    style: GoogleFonts.ubuntu(
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.white,
+                                                        fontSize: context.screenRatio * 20),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
                                           ),
                                         ),
                                         SizedBox(
@@ -187,6 +258,7 @@ class InvoicesSummaryCard extends StatelessWidget {
                                               salesProvider.startFetchingIndicator();
                                             });
                                           },
+                                          tooltip: 'Refresh',
                                           icon: salesProvider.isFetchingIndicator
                                               ? SpinKitSpinningLines(
                                                   color: Colors.blueGrey,

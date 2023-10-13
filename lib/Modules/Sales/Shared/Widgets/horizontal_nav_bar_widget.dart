@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:henawi_limited/Global/Widgets/global_notification_dialog.dart';
@@ -82,8 +83,33 @@ class HorizontalNavBarWidget extends StatelessWidget {
                       ? const Icon(Icons.notifications_outlined)
                       : const Icon(
                           Icons.notifications_active_rounded,
-                          color: Colors.amber,
+                          color: Color(0xaa9B870D),
                         ),
+                ),
+              ),
+              const Spacer(),
+              Container(
+                height: context.screenHeight * 0.065,
+                width: context.screenWidth * 0.035,
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(context.screenRatio * 8),
+                    color: Colors.grey.shade300),
+                child: IconButton(
+                  tooltip: 'Preferences',
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(context.screenRatio * 8),
+                      ),
+                    ),
+                  ),
+                  enableFeedback: true,
+                  splashColor: Colors.transparent,
+                  hoverColor: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  color: Colors.black,
+                  onPressed: () async {},
+                  icon: const Icon(CupertinoIcons.bars),
                 ),
               ),
               const Spacer(),

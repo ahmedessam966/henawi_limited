@@ -59,6 +59,7 @@ class VerticalNavBarWidget extends StatelessWidget {
                     tileTitle: 'Invoices',
                     tileIcon: CupertinoIcons.square_list_fill,
                     onTap: () {
+                      salesProvider.getLastInvoiceNumber(context);
                       salesProvider.changeViewIndex(2);
                     },
                   ),

@@ -59,7 +59,7 @@ class SalesManagerController with ChangeNotifier {
   List<OnlineRevenueItemModel> get onlineRevenueList => _onlineRevenueList;
 
   final List<ClientModel> _clientsList = [];
-  List<ClientModel> get clientsModel => _clientsList;
+  List<ClientModel> get clientsList => _clientsList;
 
   final TextEditingController _searchController = TextEditingController();
   TextEditingController get searchController => _searchController;
@@ -84,6 +84,11 @@ class SalesManagerController with ChangeNotifier {
     getAllInvoices(context);
   }
 
+  void changeSearchValue(String value) {
+    _searchController.text = value;
+    notifyListeners();
+  }
+
   Future getLastInvoiceNumber(BuildContext context) async {
     final pb = PocketBase(DatabaseServices.regularConstant);
     await pb
@@ -95,7 +100,7 @@ class SalesManagerController with ChangeNotifier {
 
       DateFormat timeFormat = DateFormat("HH:mm");
       String formattedTime = timeFormat.format(DateTime.now());
-      _lastInvoiceNumber = value.items.first.data['Invoice_Date'];
+      _lastInvoiceNumber = value.items.first.data['Invoice_Number'];
       _lastFetched = '$formattedDate - $formattedTime';
       notifyListeners();
     });
@@ -304,5 +309,45 @@ class SalesManagerController with ChangeNotifier {
         }
       });
     });
+  }
+
+  Future<InvoiceModel?> fetchSingleInvoiceDetails(String client, BuildContext context) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    RecordModel? recordModel;
+    RecordModel? recordModel2;
+
+    try {
+      await pb.collection('CLIENTS').getFirstListItem('Client_Name = "$client"').then((value) {
+        recordModel = value;
+      });
+
+      final List invoicesList = recordModel?.data['Invoices'];
+      final lastInvoiceRef = invoicesList.last;
+
+      await pb.collection('INVOICES').getOne(lastInvoiceRef).then((value) {
+        recordModel2 = value;
+      });
+
+      DateTime dateTime = DateTime.parse(recordModel2?.data['Invoice_Date']);
+      DateFormat dateFormat = DateFormat("dd MMMM yyyy");
+      String formattedDate = dateFormat.format(dateTime);
+
+      DateFormat timeFormat = DateFormat("HH:mm");
+      String formattedTime = timeFormat.format(dateTime);
+
+      return InvoiceModel(
+          client: recordModel?.data['Client_Name'],
+          issuedBy: recordModel2?.data['Issued_By'],
+          invoiceDate: '$formattedDate at $formattedTime',
+          invoiceTotal: recordModel2?.data['Invoice_Total'],
+          items: recordModel2?.data['Invoice_Breakdown'],
+          invoiceType: recordModel2?.data['Invoice_Type'],
+          paymentTerms: recordModel2?.data['Payment_Terms'],
+          invoiceNumber: recordModel2?.data['Invoice_Number'],
+          channel: recordModel2?.data['Channel']);
+    } on ClientException catch (e) {
+      DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
+      return null;
+    }
   }
 }
