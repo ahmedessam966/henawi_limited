@@ -52,7 +52,7 @@ msix_config:
   publisher_display_name: Henawi Limited Inc.
   identity_name: company.suite.flutterapp
   msix_version: 1.0.0.0
-  capabilities: internetClient, location
+  capabilities: internetClient, location, systemManagement, pointOfService, screenDuplication,
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
