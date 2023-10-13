@@ -43,7 +43,7 @@ class SalesManagerScreen extends StatelessWidget {
                     }),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
