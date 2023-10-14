@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:henawi_limited/Modules/Sales/Shared/Models/client_model.dart';
+import 'package:henawi_limited/Modules/Sales/Shared/Models/product_model.dart';
+import 'package:henawi_limited/Modules/Sales/Shared/Widgets/new_invoice_item_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:pocketbase/pocketbase.dart';
 
@@ -9,7 +11,6 @@ import '../../../../Global/Controllers/exceptions_handler.dart';
 import '../../../../Services/API/database_services.dart';
 import '../../Shared/Models/invoice_model.dart';
 import '../../Shared/Models/po_model.dart';
-import '../../Shared/Models/product_model.dart';
 import '../../Shared/Models/revenue_item_model.dart';
 
 class SalesManagerController with ChangeNotifier {
@@ -43,6 +44,9 @@ class SalesManagerController with ChangeNotifier {
   final List _fetchedPOs = [];
   final List _fetchedClients = [];
 
+  final List _fetchedProducts = [];
+  List get fetchedProducts => _fetchedProducts;
+
   final List<Widget> _invoiceItemsCount = [];
   List<Widget> get invoiceItemsCount => _invoiceItemsCount;
 
@@ -73,6 +77,9 @@ class SalesManagerController with ChangeNotifier {
   final List<OnlineRevenueItemModel> _onlineRevenueList = [];
   List<OnlineRevenueItemModel> get onlineRevenueList => _onlineRevenueList;
 
+  final List<ProductModel> _products = [];
+  List<ProductModel> get products => _products;
+
   final List<ClientModel> _clientsList = [];
   List<ClientModel> get clientsList => _clientsList;
 
@@ -81,6 +88,11 @@ class SalesManagerController with ChangeNotifier {
 
   final TextEditingController _selectedPO = TextEditingController();
   TextEditingController get selectedPO => _selectedPO;
+
+  void addInvoiceItemRow() {
+    _invoiceItemsCount.add(const NewInvoiceItemWidget());
+    notifyListeners();
+  }
 
   void changePaymentType() {
     _isCash = !_isCash;
@@ -419,5 +431,37 @@ class SalesManagerController with ChangeNotifier {
     } on ClientException catch (e) {
       DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
     }
+  }
+
+  void getInventoryProducts(BuildContext context) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    try {
+      await pb.collection('INVENTORY').getList(fields: 'Product_Serial_Number').then((value) {
+        value.items.forEach((element) {
+          if (_fetchedProducts.contains(element.data['Product_Serial_Number'])) {
+          } else {
+            _fetchedProducts.add(element.data['Product_Serial_Number']);
+          }
+        });
+      });
+    } on ClientException catch (e) {
+      DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
+    }
+  }
+
+  Future<ProductModel> fetchSingleProductDetails(BuildContext context, String entryID) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    RecordModel? recordModel;
+    await pb.collection('INVENTORY').getFirstListItem('Product_Serial_Number = "$entryID"').then((value) {
+      recordModel = value;
+    });
+    return ProductModel(
+        productSerial: recordModel?.data['Product_Serial_Number'],
+        stock: recordModel?.data['Available_Stock'],
+        cost: recordModel?.data['Cost'],
+        price: recordModel?.data['Selling_Price'],
+        maxDiscounted: recordModel?.data['Max_Discounted_Price'],
+        description: recordModel?.data['Description'],
+        category: recordModel?.data['Product_Category']);
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:henawi_limited/Modules/Sales/Managers/Controllers/sales_manager_controller.dart';
 import 'package:henawi_limited/Modules/Sales/Managers/Widgets/vertical_nav_bar_widget.dart';
 import 'package:henawi_limited/Modules/Sales/Shared/Models/invoice_model.dart';
+import 'package:henawi_limited/Modules/Sales/Shared/Widgets/new_invoice_item_widget.dart';
 import 'package:henawi_limited/Modules/Sales/Shared/Widgets/recent_invoice_flushbar.dart';
 import 'package:henawi_limited/Services/API/authentication_services.dart';
 import 'package:henawi_limited/Services/Local/dimensions.dart';
@@ -17,6 +18,7 @@ class NewInvoiceWidget extends StatelessWidget {
     return Consumer2<SalesManagerController, AuthenticationServices>(
         builder: (context, salesProvider, authProvider, _) {
       salesProvider.getClients(context);
+      salesProvider.getInventoryProducts(context);
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -31,14 +33,32 @@ class NewInvoiceWidget extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Builder(builder: (context) {
-                        String newInvoiceNumber = salesProvider.lastInvoiceNumber;
-                        List<String> parts = newInvoiceNumber.split("-");
-                        int xx = int.parse(parts[0]);
-                        xx += 1;
-                        String output = "$xx-${parts[1]}-${parts[2]}";
-                        return Text('Invoice: $output');
-                      }),
+                      Padding(
+                        padding: EdgeInsets.only(left: context.screenWidth * 0.01),
+                        child: StatefulBuilder(builder: (context, setState) {
+                          return ElevatedButton(
+                            onPressed: () {
+                              salesProvider.changeViewIndex(2);
+                              salesProvider.invoiceItemsCount.clear();
+                              setState(() {
+                                NewInvoiceItemWidget.index = 0;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                const Icon(CupertinoIcons.arrow_left_circle_fill),
+                                SizedBox(
+                                  width: context.screenWidth * 0.01,
+                                ),
+                                Text(
+                                  'Return to Invoices',
+                                  style: Theme.of(context).textTheme.labelMedium,
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ),
                       Container(
                         width: context.screenWidth * 0.4,
                         decoration: BoxDecoration(
@@ -144,38 +164,83 @@ class NewInvoiceWidget extends StatelessWidget {
                                         'Invoice Breakdown',
                                         style: Theme.of(context).textTheme.titleSmall,
                                       ),
-                                      ElevatedButton(
-                                        onPressed: () {},
-                                        child: Row(
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            const Icon(CupertinoIcons.add),
-                                            SizedBox(
-                                              width: context.screenWidth * 0.01,
-                                            ),
-                                            Text(
-                                              'Add Item',
-                                              style: Theme.of(context).textTheme.labelMedium,
-                                            )
-                                          ],
-                                        ),
-                                      ),
+                                      StatefulBuilder(builder: (context, setState) {
+                                        return ElevatedButton(
+                                          onPressed: () {
+                                            salesProvider.addInvoiceItemRow();
+                                            setState(() {
+                                              NewInvoiceItemWidget.index++;
+                                            });
+                                          },
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: [
+                                              const Icon(CupertinoIcons.add),
+                                              SizedBox(
+                                                width: context.screenWidth * 0.01,
+                                              ),
+                                              Text(
+                                                'Add Item',
+                                                style: Theme.of(context).textTheme.labelMedium,
+                                              )
+                                            ],
+                                          ),
+                                        );
+                                      })
                                     ],
                                   ),
                                   const Divider(),
-                                  // salesProvider.inventoryProductsList.isEmpty
-                                  //     ? SizedBox(
-                                  //         height: context.screenHeight * 0.4,
-                                  //         child: const Center(
-                                  //           child: Text('Invoice is empty. Start Adding Items'),
-                                  //         ),
-                                  //       )
-                                  //     :
+                                  SizedBox(
+                                    height: context.screenHeight * 0.04,
+                                    child: const Flex(
+                                      direction: Axis.horizontal,
+                                      children: [
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            'Item #',
+                                          ),
+                                        ),
+                                        VerticalDivider(),
+                                        Expanded(
+                                          flex: 3,
+                                          child: Text(
+                                            'Product',
+                                          ),
+                                        ),
+                                        VerticalDivider(),
+                                        Expanded(
+                                          flex: 4,
+                                          child: Text(
+                                            'Description',
+                                          ),
+                                        ),
+                                        VerticalDivider(),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            'QTY.',
+                                          ),
+                                        ),
+                                        VerticalDivider(),
+                                        Expanded(
+                                          flex: 1,
+                                          child: Text(
+                                            'Unit Price',
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: context.screenHeight * 0.01,
+                                  ),
                                   Expanded(
-                                    child: ListView.builder(
+                                    child: ListView.separated(
+                                        separatorBuilder: (context, index) => const Divider(),
                                         itemCount: salesProvider.invoiceItemsCount.length,
                                         itemBuilder: (context, index) {
-                                          return SizedBox();
+                                          return salesProvider.invoiceItemsCount[index];
                                         }),
                                   ),
                                 ],
