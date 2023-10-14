@@ -117,6 +117,7 @@ class InvoicesSummaryCard extends StatelessWidget {
                                                         onPressed: () {
                                                           Navigator.pop(context);
                                                           salesProvider.getLastInvoiceNumber(context);
+                                                          // salesProvider.getInventoryProducts(context);
                                                           salesProvider.changeViewIndex(9);
                                                         },
                                                         child: Text(

@@ -17,6 +17,8 @@ class GlobalLoaderAnimation {
       case 'Sales Manager':
         final provider = Provider.of<SalesManagerController>(context, listen: false);
         Future.wait([
+          provider.getTotalPO(context),
+          provider.getTotalQuotations(context),
           provider.getQuarterAnnualRevenue(context),
           provider.getDemandedAndSold(context),
           provider.getTotalGrossPerMonth(context),

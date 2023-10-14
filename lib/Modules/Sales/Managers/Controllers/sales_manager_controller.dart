@@ -8,10 +8,18 @@ import 'package:pocketbase/pocketbase.dart';
 import '../../../../Global/Controllers/exceptions_handler.dart';
 import '../../../../Services/API/database_services.dart';
 import '../../Shared/Models/invoice_model.dart';
+import '../../Shared/Models/po_model.dart';
+import '../../Shared/Models/product_model.dart';
 import '../../Shared/Models/revenue_item_model.dart';
 
 class SalesManagerController with ChangeNotifier {
   int _loadedPage = 1;
+
+  bool _isCash = true;
+  bool get isCash => _isCash;
+
+  bool _isPO = true;
+  bool get isPO => _isPO;
 
   String _lastInvoiceNumber = '';
   String get lastInvoiceNumber => _lastInvoiceNumber;
@@ -32,10 +40,17 @@ class SalesManagerController with ChangeNotifier {
   final List _fetchedSerials = [];
   final List _fetchedTopAchievers = [];
   final List _fetchedInvoices = [];
+  final List _fetchedPOs = [];
   final List _fetchedClients = [];
+
+  final List<Widget> _invoiceItemsCount = [];
+  List<Widget> get invoiceItemsCount => _invoiceItemsCount;
 
   final List<InvoiceModel> _createdInvoice = [];
   List<InvoiceModel> get createdInvoice => _createdInvoice;
+
+  final List<PurchaseOrderModel> _poList = [];
+  List<PurchaseOrderModel> get poList => _poList;
 
   final Map _demandedList = {};
   Map get demandedList => _demandedList;
@@ -64,6 +79,19 @@ class SalesManagerController with ChangeNotifier {
   final TextEditingController _searchController = TextEditingController();
   TextEditingController get searchController => _searchController;
 
+  final TextEditingController _selectedPO = TextEditingController();
+  TextEditingController get selectedPO => _selectedPO;
+
+  void changePaymentType() {
+    _isCash = !_isCash;
+    notifyListeners();
+  }
+
+  void changePOMethod() {
+    _isPO = !_isPO;
+    notifyListeners();
+  }
+
   void startFetchingIndicator() {
     _isFetchingIndicator = !_isFetchingIndicator;
     notifyListeners();
@@ -86,6 +114,11 @@ class SalesManagerController with ChangeNotifier {
 
   void changeSearchValue(String value) {
     _searchController.text = value;
+    notifyListeners();
+  }
+
+  void changeSelectedPO(String value) {
+    _selectedPO.text = value;
     notifyListeners();
   }
 
@@ -348,6 +381,43 @@ class SalesManagerController with ChangeNotifier {
     } on ClientException catch (e) {
       DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
       return null;
+    }
+  }
+
+  Future getPurchaseOrders(BuildContext context) async {
+    final pb = PocketBase(DatabaseServices.regularConstant);
+    try {
+      await pb.collection('PURCHASE_ORDERS').getFullList(batch: 20, sort: '+PO_Date').then((value) {
+        value.forEach((element) async {
+          String clientName = '';
+          if (_fetchedPOs.contains(element.data['PO_Number'])) {
+          } else {
+            _fetchedPOs.add(element.data['PO_Number']);
+            DateTime dateTime = DateTime.parse(element.data['PO_Date']);
+            DateFormat dateFormat = DateFormat("dd MMMM yyyy");
+            String formattedDate = dateFormat.format(dateTime);
+
+            DateFormat timeFormat = DateFormat("HH:mm");
+            String formattedTime = timeFormat.format(dateTime);
+
+            await pb.collection('CLIENTS').getOne(element.data['Client']).then((value) {
+              clientName = value.data['Client_Name'];
+            });
+
+            final po = PurchaseOrderModel(
+              request: element.data['Request'],
+              poNumber: element.data['PO_Number'],
+              poDate: '$formattedDate at $formattedTime',
+              poClient: clientName,
+              poStatus: element.data['Status'],
+            );
+            _poList.add(po);
+            notifyListeners();
+          }
+        });
+      });
+    } on ClientException catch (e) {
+      DatabaseExceptionsControllers.handleDatabaseExceptions(context, e.statusCode);
     }
   }
 }

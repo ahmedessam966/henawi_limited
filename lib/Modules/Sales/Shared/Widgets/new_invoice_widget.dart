@@ -22,13 +22,13 @@ class NewInvoiceWidget extends StatelessWidget {
         children: [
           const VerticalNavBarWidget(),
           Expanded(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(context.screenRatio * 8),
-                  child: Row(
+            child: Padding(
+              padding: EdgeInsets.all(context.screenRatio * 8),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Builder(builder: (context) {
@@ -103,23 +103,91 @@ class NewInvoiceWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-                ),
-                salesProvider.searchController.text.isNotEmpty
-                    ? const Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Card(
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: context.screenHeight * 0.7,
+                          child: Card(
+                            child: Padding(
+                              padding: EdgeInsets.all(context.screenRatio * 8),
                               child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [],
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Builder(builder: (context) {
+                                        String newInvoiceNumber = salesProvider.lastInvoiceNumber;
+                                        List<String> parts = newInvoiceNumber.split("-");
+                                        int xx = int.parse(parts[0]);
+                                        xx += 1;
+                                        String output = "$xx-${parts[1]}-${parts[2]}";
+                                        return Text('Invoice: $output');
+                                      }),
+                                      Text(salesProvider.searchController.text),
+                                      ElevatedButton(
+                                        onPressed: () {},
+                                        child: Text(
+                                          'Select Date',
+                                          style: Theme.of(context).textTheme.labelMedium,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Invoice Breakdown',
+                                        style: Theme.of(context).textTheme.titleSmall,
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {},
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: [
+                                            const Icon(CupertinoIcons.add),
+                                            SizedBox(
+                                              width: context.screenWidth * 0.01,
+                                            ),
+                                            Text(
+                                              'Add Item',
+                                              style: Theme.of(context).textTheme.labelMedium,
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const Divider(),
+                                  // salesProvider.inventoryProductsList.isEmpty
+                                  //     ? SizedBox(
+                                  //         height: context.screenHeight * 0.4,
+                                  //         child: const Center(
+                                  //           child: Text('Invoice is empty. Start Adding Items'),
+                                  //         ),
+                                  //       )
+                                  //     :
+                                  Expanded(
+                                    child: ListView.builder(
+                                        itemCount: salesProvider.invoiceItemsCount.length,
+                                        itemBuilder: (context, index) {
+                                          return SizedBox();
+                                        }),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      )
-                    : const SizedBox()
-              ],
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ),
         ],

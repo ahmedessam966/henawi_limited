@@ -50,7 +50,7 @@ class VerticalNavBarWidget extends StatelessWidget {
               height: 20,
             ),
             //////////////////////////////////////////////////////////////////////////////////////////////////
-            salesProvider.viewIndex == 2
+            salesProvider.viewIndex == 2 || salesProvider.viewIndex == 9 || salesProvider.viewIndex == 10
                 ? const NavBarActiveListTile(
                     tileTitle: 'Invoices',
                     tileIcon: CupertinoIcons.square_list_fill,
